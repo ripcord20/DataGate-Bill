@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="/css/responsive-admin.css" rel="stylesheet">
+    <style>
+        body { background: #f5f6fa; }
+        
+        /* Mobile responsive fixes */
+        @media (max-width: 767.98px) {
+            .main-content {
+                margin-top: 70px !important; /* Extra space for mobile navbar */
+                padding-top: 10px !important;
+                z-index: 1;
+            }
+            .card {
+                z-index: 1;
+            }
+            /* Pastikan cards tidak overlap dengan mobile navbar */
+            .row.mb-4:first-of-type {
+                margin-top: 10px;
+            }
+            /* Responsive notification positioning */
+            #restartNotif {
+                top: 80px !important; /* Below mobile navbar */
+                right: 10px !important;
+                left: 10px !important;
+                width: auto !important;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Include Responsive Admin Sidebar -->
+        <%- include('partials/admin-responsive-sidebar', { page: 'dashboard', settings: settings }) %>
+        
+        <main class="col-md-10 ms-sm-auto main-content">
+            <!-- GENIEACS CARDS -->
+            <div class="row mb-4">
+              <div class="col-md-4 mb-3">
+                <div class="card text-bg-primary">
+                  <div class="card-body text-center">
+                    <i class="bi bi-hdd-network fs-2 mb-2"></i>
+                    <div class="fw-bold">Total Device GenieACS</div>
+                    <div class="fs-3" id="genieacs-total"><%= typeof genieacsTotal !== 'undefined' ? genieacsTotal : '-' %></div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4 mb-3">
+                <div class="card text-bg-success">
+                  <div class="card-body text-center">
+                    <i class="bi bi-wifi fs-2 mb-2"></i>
+                    <div class="fw-bold">Device Online</div>
+                    <div class="fs-3" id="genieacs-online"><%= typeof genieacsOnline !== 'undefined' ? genieacsOnline : '-' %></div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4 mb-3">
+                <div class="card text-bg-danger">
+                  <div class="card-body text-center">
+                    <i class="bi bi-wifi-off fs-2 mb-2"></i>
+                    <div class="fw-bold">Device Offline</div>
+                    <div class="fs-3" id="genieacs-offline"><%= typeof genieacsOffline !== 'undefined' ? genieacsOffline : '-' %></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- MIKROTIK CARDS -->
+            <div class="row mb-4">
+              <div class="col-md-4 mb-3">
+                <div class="card text-bg-secondary">
+                  <div class="card-body text-center">
+                    <i class="bi bi-person-badge fs-2 mb-2"></i>
+                    <div class="fw-bold">Total User PPPoE</div>
+                    <div class="fs-3" id="mikrotik-total"><%= typeof mikrotikTotal !== 'undefined' ? mikrotikTotal : '-' %></div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4 mb-3">
+                <div class="card text-bg-success">
+                  <div class="card-body text-center">
+                    <i class="bi bi-person-check fs-2 mb-2"></i>
+                    <div class="fw-bold">PPPoE Aktif</div>
+                    <div class="fs-3" id="mikrotik-aktif"><%= typeof mikrotikAktif !== 'undefined' ? mikrotikAktif : '-' %></div>
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4 mb-3">
+                <div class="card text-bg-danger">
+                  <div class="card-body text-center">
+                    <i class="bi bi-person-x fs-2 mb-2"></i>
+                    <div class="fw-bold">PPPoE Offline</div>
+                    <div class="fs-3" id="mikrotik-offline"><%= typeof mikrotikOffline !== 'undefined' ? mikrotikOffline : '-' %></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <!-- GRAFIK INTERNET -->
+            <div class="row mb-4">
+              <div class="col-md-12">
+                <div class="card text-bg-info">
+                  <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                      <div class="fw-bold" style="font-size: 1.1rem;"><i class="bi bi-graph-up-arrow"></i> Grafik Traffic Internet - <span id="currentInterface">Ether1</span></div>
+                      <div class="d-flex align-items-center">
+                        <label for="interfaceSelect" class="form-label me-2 mb-0" style="font-size: 0.9rem;">Interface:</label>
+                        <select id="interfaceSelect" class="form-select form-select-sm" style="width: auto; font-size: 0.9rem;">
+                          <option value="ether1-ISP">Ether1-ISP (ISP)</option>
+                          <!-- Interface akan di-load secara dinamis -->
+                        </select>
+                      </div>
+                    </div>
+                    
+                    <!-- Real-time bandwidth info -->
+                    <div class="row mb-2">
+                      <div class="col-md-3">
+                        <div class="card bg-primary text-white">
+                          <div class="card-body text-center py-1">
+                            <small class="d-block" style="font-size: 0.75rem;">Download</small>
+                            <strong id="currentRx" style="font-size: 1.1rem;">0 Mbps</strong>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-md-3">
+                        <div class="card bg-success text-white">
+                          <div class="card-body text-center py-1">
+                            <small class="d-block" style="font-size: 0.75rem;">Upload</small>
+                            <strong id="currentTx" style="font-size: 1.1rem;">0 Mbps</strong>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-md-3">
+                        <div class="card bg-info text-white">
+                          <div class="card-body text-center py-1">
+                            <small class="d-block" style="font-size: 0.75rem;">Total</small>
+                            <strong id="currentTotal" style="font-size: 1.1rem;">0 Mbps</strong>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-md-3">
+                        <div class="card bg-warning text-white">
+                          <div class="card-body text-center py-1">
+                            <small class="d-block" style="font-size: 0.75rem;">Status</small>
+                            <strong id="currentStatus" style="font-size: 1.1rem;">Idle</strong>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div style="height: 300px;">
+                      <canvas id="internetChart"></canvas>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+            <script>
+            // Grafik bandwidth real-time
+const ctx = document.getElementById('internetChart').getContext('2d');
+const maxPoints = 30; // tampilkan 30 data terakhir
+let currentInterface = localStorage.getItem('selectedInterface') || 'ether1-ISP'; // Ambil dari localStorage atau default sesuai settings.json
+let chart = new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels: [],
+    datasets: [
+      {
+        label: 'RX (Mbps)',
+        data: [],
+        fill: true,
+        backgroundColor: 'rgba(13,202,240,0.2)',
+        borderColor: 'rgba(13,202,240,1)',
+        tension: 0.4
+      },
+      {
+        label: 'TX (Mbps)',
+        data: [],
+        fill: true,
+        backgroundColor: 'rgba(40,167,69,0.2)',
+        borderColor: 'rgba(40,167,69,1)',
+        tension: 0.4
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { 
+      legend: { 
+        display: true,
+        position: 'top',
+        labels: {
+          padding: 10,
+          usePointStyle: true
+        }
+      },
+      tooltip: {
+        mode: 'index',
+        intersect: false,
+        backgroundColor: 'rgba(0,0,0,0.8)',
+        titleColor: 'white',
+        bodyColor: 'white',
+        callbacks: {
+          label: function(context) {
+            return context.dataset.label + ': ' + context.parsed.y + ' Mbps';
+          }
+        }
+      }
+    },
+    scales: { 
+      y: { 
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: 'Bandwidth (Mbps)',
+          font: {
+            size: 12
+          }
+        },
+        ticks: {
+          callback: function(value) {
+            return value + ' Mbps';
+          },
+          font: {
+            size: 10
+          }
+        },
+        grid: {
+          color: 'rgba(0,0,0,0.1)'
+        }
+      },
+      x: {
+        title: {
+          display: true,
+          text: 'Time',
+          font: {
+            size: 12
+          }
+        },
+        ticks: {
+          font: {
+            size: 10
+          }
+        },
+        grid: {
+          color: 'rgba(0,0,0,0.1)'
+        }
+      }
+    },
+    interaction: {
+      mode: 'nearest',
+      axis: 'x',
+      intersect: false
+    },
+    elements: {
+      point: {
+        radius: 2,
+        hoverRadius: 4
+      },
+      line: {
+        borderWidth: 2
+      }
+    }
+  }
+});
+
+function addTrafficData(rx, tx, interface) {
+  const now = new Date();
+  const label = now.toLocaleTimeString('id-ID', { hour12: false });
+  
+  // Konversi ke Mbps
+  const rxMbps = (rx/1000000).toFixed(2);
+  const txMbps = (tx/1000000).toFixed(2);
+  const totalMbps = (parseFloat(rxMbps) + parseFloat(txMbps)).toFixed(2);
+  
+  // Update real-time info
+  document.getElementById('currentRx').textContent = rxMbps + ' Mbps';
+  document.getElementById('currentTx').textContent = txMbps + ' Mbps';
+  document.getElementById('currentTotal').textContent = totalMbps + ' Mbps';
+  
+  // Update status berdasarkan traffic
+  const statusElement = document.getElementById('currentStatus');
+  if (parseFloat(totalMbps) > 10) {
+    statusElement.textContent = 'High';
+    statusElement.parentElement.parentElement.className = 'card bg-danger text-white';
+  } else if (parseFloat(totalMbps) > 1) {
+    statusElement.textContent = 'Medium';
+    statusElement.parentElement.parentElement.className = 'card bg-warning text-white';
+  } else if (parseFloat(totalMbps) > 0.1) {
+    statusElement.textContent = 'Low';
+    statusElement.parentElement.parentElement.className = 'card bg-info text-white';
+  } else {
+    statusElement.textContent = 'Idle';
+    statusElement.parentElement.parentElement.className = 'card bg-secondary text-white';
+  }
+  
+  // Update chart
+  if (chart.data.labels.length >= maxPoints) {
+    chart.data.labels.shift();
+    chart.data.datasets[0].data.shift();
+    chart.data.datasets[1].data.shift();
+  }
+  chart.data.labels.push(label);
+  chart.data.datasets[0].data.push(parseFloat(rxMbps));
+  chart.data.datasets[1].data.push(parseFloat(txMbps));
+  chart.update();
+}
+
+function resetChart() {
+  // Reset chart data ketika interface berubah
+  chart.data.labels = [];
+  chart.data.datasets[0].data = [];
+  chart.data.datasets[1].data = [];
+  chart.update();
+}
+
+async function fetchTraffic() {
+  try {
+    const res = await fetch(`/api/dashboard/traffic?interface=${currentInterface}`);
+    const data = await res.json();
+    if (data.success) {
+      addTrafficData(data.rx, data.tx, data.interface);
+    }
+  } catch (e) { 
+    console.error('Error fetching traffic data:', e);
+  }
+}
+
+// Load interface secara dinamis dari Mikrotik
+async function loadInterfaces() {
+  try {
+    console.log('🔄 Loading interfaces from Mikrotik...');
+    const response = await fetch('/api/dashboard/interfaces');
+    const data = await response.json();
+    
+    console.log('📋 API Response:', data);
+    
+    if (data.success && data.interfaces && data.interfaces.length > 0) {
+      const select = document.getElementById('interfaceSelect');
+      
+      // Hapus semua option kecuali yang pertama (default)
+      while (select.children.length > 1) {
+        select.removeChild(select.lastChild);
+      }
+      
+      // Tambahkan interface yang terdeteksi
+      data.interfaces.forEach(iface => {
+        const option = document.createElement('option');
+        option.value = iface.name;
+        
+        // Buat label yang informatif
+        let label = iface.name;
+        
+        // Tambahkan label khusus untuk interface tertentu
+        if (iface.name === 'ether1-ISP') {
+          label = 'ether1-ISP (ISP)';
+        } else if (iface.name === 'ether2-CADANGAN ISP') {
+          label = 'ether2-CADANGAN ISP (Backup)';
+        } else if (iface.name === 'ether3-LOKAL') {
+          label = 'ether3-LOKAL (Local)';
+        } else if (iface.name === 'ether4-LOKAL-LEPTOP') {
+          label = 'ether4-LOKAL-LEPTOP (Laptop)';
+        } else if (iface.name === 'ether5-LOKAL-REMOT OLT') {
+          label = 'ether5-LOKAL-REMOT OLT (Remote)';
+        } else if (iface.name === 'ether6-OLT-SFP1-TANJUNGPURA') {
+          label = 'ether6-OLT-SFP1-TANJUNGPURA (OLT1)';
+        } else if (iface.name === 'ether7-OLT-SFP2-TANJUNGPURA2') {
+          label = 'ether7-OLT-SFP2-TANJUNGPURA2 (OLT2)';
+        } else if (iface.name === 'ether8-HOTSPOT-RADIO') {
+          label = 'ether8-HOTSPOT-RADIO (Hotspot)';
+        } else if (iface.name === 'ether9-HOTSPOT-SWICTHHUB') {
+          label = 'ether9-HOTSPOT-SWICTHHUB (Switch)';
+        } else if (iface.name === 'ether10-POP PEGAGAN/JANGGAR') {
+          label = 'ether10-POP PEGAGAN/JANGGAR (POP)';
+        } else if (iface.name === 'bridge1-HOTSPOT') {
+          label = 'bridge1-HOTSPOT (Bridge)';
+        } else if (iface.name === 'bridge2_OLT') {
+          label = 'bridge2_OLT (Bridge OLT)';
+        } else if (iface.name === 'vlan6-1100') {
+          label = 'vlan6-1100 (VLAN)';
+        }
+        
+        // Tambahkan status
+        if (iface.disabled) {
+          label += ' [Disabled]';
+        } else if (!iface.running) {
+          label += ' [Down]';
+        } else {
+          label += ' [Active]';
+        }
+        
+        option.textContent = label;
+        select.appendChild(option);
+      });
+      
+      console.log(`✅ Loaded ${data.interfaces.length} interfaces from Mikrotik`);
+      
+      // Update current interface jika tidak ada di list
+      const currentOption = select.querySelector(`option[value="${currentInterface}"]`);
+      if (!currentOption && data.interfaces.length > 0) {
+        currentInterface = data.interfaces[0].name;
+        localStorage.setItem('selectedInterface', currentInterface);
+        document.getElementById('currentInterface').textContent = currentInterface;
+        select.value = currentInterface;
+      }
+      
+    } else {
+      console.warn('⚠️ Failed to load interfaces, using default options');
+      console.warn('Response:', data);
+    }
+  } catch (error) {
+    console.error('❌ Error loading interfaces:', error);
+    console.error('Error details:', error.message);
+  }
+}
+
+// Set interface yang tersimpan ke dropdown
+document.getElementById('interfaceSelect').value = currentInterface;
+document.getElementById('currentInterface').textContent = currentInterface;
+
+// Event listener untuk perubahan interface
+document.getElementById('interfaceSelect').addEventListener('change', function() {
+  currentInterface = this.value;
+  localStorage.setItem('selectedInterface', currentInterface); // Simpan ke localStorage
+  document.getElementById('currentInterface').textContent = currentInterface; // Update tampilan
+  console.log('Interface changed to:', currentInterface);
+  resetChart();
+  fetchTraffic(); // Fetch data baru segera
+});
+
+// Load interfaces saat halaman dimuat
+loadInterfaces();
+
+// Set interval untuk update data
+setInterval(fetchTraffic, 2000);
+fetchTraffic();
+</script>
+<script>
+// Fungsi untuk me-refresh logo dengan timestamp baru
+function refreshLogo() {
+    const logo = document.getElementById('logoImage');
+    if (logo) {
+        // Tambahkan parameter timestamp baru untuk memaksa reload gambar
+        const timestamp = new Date().getTime();
+        const src = logo.src.split('?')[0]; // Hapus parameter yang ada
+        logo.src = `${src}?v=${timestamp}`;
+    }
+}
+
+// Refresh logo setiap 5 detik
+setInterval(refreshLogo, 5000);
+
+// Refresh logo saat halaman dimuat
+document.addEventListener('DOMContentLoaded', function() {
+    refreshLogo();
+});
+</script>
+            </main>
+    </div>
+</div>
+<!-- Modal Konfirmasi Restart Mikrotik -->
+<div class="modal fade" id="restartMikrotikModal" tabindex="-1" aria-labelledby="restartMikrotikModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="restartMikrotikModalLabel"><i class="bi bi-arrow-repeat"></i> Konfirmasi Restart Mikrotik</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Apakah Anda yakin ingin <b>restart Mikrotik</b>?<br>Router akan reboot dan koneksi internet pelanggan akan terputus sementara.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+        <button type="button" class="btn btn-danger" id="confirmRestartMikrotik">Restart</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Toast Container -->
+<div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// Fungsi toast notification
+function showToast(type, title, message, duration = 5000) {
+    const toastId = 'toast-' + Date.now();
+    const iconClass = type === 'success' ? 'bi-check-circle' : type === 'error' ? 'bi-x-circle' : 'bi-info-circle';
+    const bgClass = type === 'success' ? 'bg-success' : type === 'error' ? 'bg-danger' : 'bg-primary';
+    
+    const toastHtml = `
+        <div id="${toastId}" class="toast align-items-center text-white ${bgClass} border-0" role="alert" aria-live="assertive" aria-atomic="true" style="min-width: 300px;">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="bi ${iconClass} me-2"></i>
+                    <strong>${title}</strong><br>
+                    <small>${message}</small>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    `;
+    
+    $('#toast-container').append(toastHtml);
+    const toastElement = document.getElementById(toastId);
+    const toast = new bootstrap.Toast(toastElement, { delay: duration });
+    toast.show();
+    
+    // Auto remove after hide
+    toastElement.addEventListener('hidden.bs.toast', () => {
+        toastElement.remove();
+    });
+}
+
+$(function() {
+  $(document).on('click', '#restartMikrotikBtn', function(e) {
+    e.preventDefault();
+    $('#restartMikrotikModal').modal('show');
+  });
+  
+  $('#confirmRestartMikrotik').on('click', function() {
+    const $btn = $(this);
+    const originalText = $btn.html();
+    
+    // Loading state
+    $btn.prop('disabled', true).html('<i class="bi bi-hourglass-split"></i> Restarting...');
+    $('#restartMikrotikModal').modal('hide');
+    
+    $.ajax({
+      url: '/admin/mikrotik/restart',
+      method: 'POST',
+      success: function(res) {
+        if(res.success) {
+          showToast('success', 'Restart Berhasil', res.message || 'Mikrotik berhasil direstart!');
+        } else {
+          showToast('error', 'Restart Gagal', res.message || 'Gagal restart Mikrotik!');
+        }
+      },
+      error: function() {
+        showToast('error', 'Error', 'Gagal menghubungi server!');
+      },
+      complete: function() {
+        // Reset button
+        $btn.prop('disabled', false).html(originalText);
+      }
+    });
+  });
+});
+</script>
+
+</body>
+</html>
