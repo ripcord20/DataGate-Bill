@@ -41,8 +41,11 @@
 # Install git jika belum ada
 apt install git curl -y
 
+sudo apt update
+sudo apt install git
+
 # Clone repository
-https://github.com/ripcord20/DataGate-Bill.git
+git clone https://github.com/ripcord20/DataGate-Bill.git
 cd DataGate-Bill
 ```
 
