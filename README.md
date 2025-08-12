@@ -42,8 +42,8 @@
 apt install git curl -y
 
 # Clone repository
-git clone https://github.com/alijayanet/gembok-bill
-cd gembok-bill
+https://github.com/ripcord20/DataGate-Bill.git
+cd DataGate-Bill
 ```
 
 ### 2. Install Dependencies
@@ -59,21 +59,21 @@ Edit file `settings.json` dengan pengaturan yang sesuai:
 
 ```json
 {
-  "admins.0": "6281947215703",
+  "admins.0": "628529988665",
   "admin_enabled": "true",
   "admin_username": "admin",
   "admin_password": "admin",
-  "genieacs_url": "http://192.168.8.89:7557",
+  "genieacs_url": "http://192.168.22.253:7557",
   "genieacs_username": "admin",
   "genieacs_password": "admin",
-  "mikrotik_host": "192.168.8.1",
-  "mikrotik_port": "8728",
+  "mikrotik_host": "192.168.90.1",
+  "mikrotik_port": "7288",
   "mikrotik_user": "admin",
   "mikrotik_password": "admin",
-  "main_interface": "ether1-ISP",
+  "main_interface": "sfp+1",
   "pppoe_monitor_enable": "true",
-  "technician_numbers.0": "6283807665111",
-  "technician_numbers.1": "6282218094111",
+  "technician_numbers.0": "6285784495037",
+  "technician_numbers.1": "6285606424075",
   "technician_group_id": "120363029715729111@g.us",
   "whatsapp_session_path": "./whatsapp-session",
   "whatsapp_keep_alive": "true",
@@ -84,8 +84,8 @@ Edit file `settings.json` dengan pengaturan yang sesuai:
   "rx_power_critical": "-45",
   "rx_power_notification_enable": "true",
   "rx_power_notification_interval": "300000",
-  "company_header": "🏢 ALIJAYA DIGITAL NETWORK 🏢",
-  "footer_info": "Juragan Pulsa Wifi Hotspot",
+  "company_header": "🏢 DATAGATE 🏢",
+  "footer_info": "The Real Fastes Interconnected",
   "customerPortalOtp": "false",
   "otp_length": "4",
   "otp_expiry_minutes": "5",
@@ -163,13 +163,13 @@ npm start
 npm install -g pm2
 
 # Start aplikasi
-pm2 start app.js --name gembok-bill
+pm2 start app.js --name DataGate-Bill
 
 # Monitor aplikasi
 pm2 monit
 
 # View logs
-pm2 logs gembok-bill
+pm2 logs DataGate-Bill
 ```
 
 ### 6. Setup WhatsApp Bot
@@ -332,7 +332,7 @@ Aplikasi mendukung 3 payment gateway populer di Indonesia:
 Jika ada error seperti:
 ```
 Error sending message: Error: item-not-found
-warn: Skipping invalid WhatsApp number: 6283807665111
+warn: Skipping invalid WhatsApp number: 08xxxxxxxx
 ```
 
 **Solusi:**
