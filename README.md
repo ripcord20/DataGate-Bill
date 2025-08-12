@@ -1,4 +1,4 @@
-# Gembok Bill - Sistem Manajemen ISP Terintegrasi
+# DATAGATE - Sistem Manajemen ISP Terintegrasi
 
 [![GitHub stars](https://img.shields.io/github/stars/alijayanet/gembok-bill)](https://github.com/alijayanet/gembok-bill/stargazers)
 [![GitHub forks](https://img.shields.io/github/forks/alijayanet/gembok-bill)](https://github.com/alijayanet/gembok-bill/network)
